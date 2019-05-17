@@ -316,22 +316,24 @@ if __name__ == "__main__":
     database_path = r"C:\Data\Stock\StockDataBase"
     a = StockAssayer(database_path)
     a.update_the_dir(r"C:\Data\Stock\my_stock_list", 30)
+    # a.update_the_dir(r"C:\Data\Stock\Beyondmeat", 30)
+
     chosen_stock_list_path = r"C:\Data\Stock\chosen_stock_list.txt"
     # chosen_stock_list_path = r"C:\Data\Stock\TargetStocks\monitor_stocks.csv"
     a.load_Stocks_internally(chosen_stock_list_path)
     a.refresh_internal_stocks_by_ndays(30)
     # a.show_package_stocks_info(a.stocks, 10)
-    stocks_rise_ratio = a.sort_stocks_by_attr_return_n(a.stocks, "rise_ratio", max_num=10)
+    # stocks_rise_ratio = a.sort_stocks_by_attr_return_n(a.stocks, "rise_ratio", max_num=10)
     # stocks_pcd_cov = a.sort_stocks_by_attr_return_n(a.stocks, "pcd_cov", max_num=10)
     # stocks_pcc_cov = a.sort_stocks_by_attr_return_n(stocks_pcd_cov, "pcc_cov")
     # stocks_ncd_cov = a.sort_stocks_by_attr_return_n(a.stocks, "ncd_cov", max_num=50)
     # stocks_ncc_cov = a.sort_stocks_by_attr_return_n(a.stocks, "ncc_cov", max_num=10)
-    # stocks_growth = a.sort_stocks_by_attr_return_n(a.stocks, "growth", max_num=10)
+    stocks_growth = a.sort_stocks_by_attr_return_n(a.stocks, "growth", max_num=10)
     # stocks_ncc_cov_0 = a.sort_stocks_by_attr_return_n(stocks_growth, "ncc_cov")
     # stocks_pcc_cov_1 = a.sort_stocks_by_attr_return_n(stocks_ncc_cov_0, "pcc_cov")
-    dst_dir = r"C:\Data\Stock\copyhere_30day_riseratio_stocks"
-    a.update_the_dir(dst_dir, 30)
-    a.dump_stocks_to_dir(stocks_rise_ratio, dst_dir)
+    dst_dir = r"C:\Data\Stock\0509_stock_growth_10"
+    # a.update_the_dir(dst_dir, 30)
+    a.dump_stocks_to_dir(stocks_growth, dst_dir)
 
     dst_dir2 = r"C:\Data\Stock\copyhere_top10_ncc_cov"
     # a.dump_stocks_to_dir(stocks_ncc_cov, dst_dir2)

@@ -25,7 +25,11 @@ class StockTracker:
         self.p_continue_days_max = 0
         self.n_continue_days_max = 0
         self.daily_rise_percent_max = 0.0
+        self.daily_rise_percent_max2 = 0.0
+        self.daily_rise_percent_max3 = 0.0
         self.daily_fall_percent_max = 0.0
+        self.daily_fall_percent_max2 = 0.0
+        self.daily_fall_percent_max3 = 0.0
         self.volume_alarm_max = 0
 
         # we want the message to be sent once a day, or will be too sensitive and annoying
@@ -37,7 +41,11 @@ class StockTracker:
         self.p_continue_days_max_sent = False
         self.n_continue_days_max_sent = False
         self.daily_rise_percent_max_sent = False
+        self.daily_rise_percent_max2_sent = False
+        self.daily_rise_percent_max3_sent = False
         self.daily_fall_percent_max_sent = False
+        self.daily_fall_percent_max2_sent = False
+        self.daily_fall_percent_max3_sent = False
         self.volume_alarm_max_sent = False
 
         # from tushare
@@ -86,7 +94,11 @@ class StockTracker:
         self.p_continue_days_max = content_dict["p_continue_days_max"]
         self.n_continue_days_max = content_dict["n_continue_days_max"]
         self.daily_rise_percent_max = content_dict["daily_rise_percent_max"]
+        self.daily_rise_percent_max2 = content_dict["daily_rise_percent_max2"]
+        self.daily_rise_percent_max3 = content_dict["daily_rise_percent_max3"]
         self.daily_fall_percent_max = content_dict["daily_fall_percent_max"]
+        self.daily_fall_percent_max2 = content_dict["daily_fall_percent_max2"]
+        self.daily_fall_percent_max3 = content_dict["daily_fall_percent_max3"]
         self.volume_alarm_max = content_dict["volume_alarm_max"]
 
         if self.price_alarm_max != 0:
@@ -103,8 +115,16 @@ class StockTracker:
             self.check_mask.append("check_ncd_max")
         if self.daily_rise_percent_max != 0:
             self.check_mask.append("check_rise_percent_max")
+        if self.daily_rise_percent_max2 != 0:
+            self.check_mask.append("check_rise_percent_max2")
+        if self.daily_rise_percent_max3 != 0:
+            self.check_mask.append("check_rise_percent_max3")
         if self.daily_fall_percent_max != 0:
             self.check_mask.append("check_fall_percent_max")
+        if self.daily_fall_percent_max2 != 0:
+            self.check_mask.append("check_fall_percent_max2")
+        if self.daily_fall_percent_max3 != 0:
+            self.check_mask.append("check_fall_percent_max3")
         if self.volume_alarm_max != 0:
             self.check_mask.append("check_volume_max")
 
@@ -167,12 +187,40 @@ class StockTracker:
                     self.send_message_to_wechat_friend(message)
                     self.daily_rise_percent_max_sent = True
 
+            elif mask == "check_rise_percent_max2" and not self.daily_rise_percent_max2_sent:
+                if self.current_percent > self.daily_rise_percent_max2:
+                    message = f"{stock_name} {self.stock_number} 今日涨幅: {self.current_percent} " \
+                        f"已达到每日阈值: {self.daily_rise_percent_max2}, 可以考虑卖出"
+                    self.send_message_to_wechat_friend(message)
+                    self.daily_rise_percent_max2_sent = True
+
+            elif mask == "check_rise_percent_max3" and not self.daily_rise_percent_max3_sent:
+                if self.current_percent > self.daily_rise_percent_max3:
+                    message = f"{stock_name} {self.stock_number} 今日涨幅: {self.current_percent} " \
+                        f"已达到每日阈值: {self.daily_rise_percent_max3}, 可以考虑卖出"
+                    self.send_message_to_wechat_friend(message)
+                    self.daily_rise_percent_max3_sent = True
+
             elif mask == "check_fall_percent_max" and not self.daily_fall_percent_max_sent:
                 if self.current_percent < self.daily_fall_percent_max:
                     message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
                         f"已达到每日阈值: {self.daily_fall_percent_max}, 今天大趋势下跌, 可以考虑补仓或者卖出"
                     self.send_message_to_wechat_friend(message)
                     self.daily_fall_percent_max_sent = True
+
+            elif mask == "check_fall_percent_max2" and not self.daily_fall_percent_max2_sent:
+                if self.current_percent < self.daily_fall_percent_max2:
+                    message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
+                        f"已达到每日阈值: {self.daily_fall_percent_max2}, 今天大趋势下跌, 可以考虑补仓或者卖出"
+                    self.send_message_to_wechat_friend(message)
+                    self.daily_fall_percent_max2_sent = True
+
+            elif mask == "check_fall_percent_max3" and not self.daily_fall_percent_max3_sent:
+                if self.current_percent < self.daily_fall_percent_max3:
+                    message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
+                        f"已达到每日阈值: {self.daily_fall_percent_max3}, 今天大趋势下跌, 可以考虑补仓或者卖出"
+                    self.send_message_to_wechat_friend(message)
+                    self.daily_fall_percent_max3_sent = True
 
             elif mask == "check_pcc_max" and not self.p_continue_change_percent_max_sent:
                 if self.p_continue_change_percent + self.current_percent > self.p_continue_change_percent_max:
