@@ -71,8 +71,10 @@ class StockTracker:
             self.p_continue_days_max_sent = True
         self.p_continue_change_percent = stock.positive_continue_change_percent[-1]
         self.n_continue_change_percent = stock.negative_continue_change_percent[-1]
-        self.p_continue_days = stock.positive_continue_days[-1]
-        self.n_continue_days = stock.negative_continue_days[-1]
+        if stock.stock_daily_data_ndays[-1].change_percent >= 0:
+            self.p_continue_days = stock.positive_continue_days[-1]
+        else:
+            self.n_continue_days = stock.negative_continue_days[-1]
         self.rise_percent_avg = stock.rise_percent_avg
         self.fall_percent_avg = stock.fall_percent_avg
 
@@ -162,63 +164,99 @@ class StockTracker:
             if mask == "check_price_max" and not self.price_alarm_max_sent:
                 if self.current_price > self.price_alarm_max:
                     message = f"{stock_name} {self.stock_number} 当前价: {self.current_price} " \
-                        f"已超过提醒价: {self.price_alarm_max}, 可以考虑卖出"
+                        f"已超过提醒价: {self.price_alarm_max}, 可以考虑卖出\n"
                     self.send_message_to_wechat_friend(message)
                     self.price_alarm_max_sent = True
 
             elif mask == "check_price_min" and not self.price_alarm_min_sent:
                 if self.current_price < self.price_alarm_min:
                     message = f"{stock_name} {self.stock_number} 当前价: {self.current_price} " \
-                        f"已低于提醒价: {self.price_alarm_min}, 可以考虑买入"
+                        f"已低于提醒价: {self.price_alarm_min}, 可以考虑买入\n"
                     self.send_message_to_wechat_friend(message)
                     self.price_alarm_min_sent = True
 
             elif mask == "check_volume_max" and not self.volume_alarm_max_sent:
                 if self.current_volume > self.volume_alarm_max:
                     message = f"{stock_name} {self.stock_number} 当前成交量: {self.current_volume} " \
-                        f"已达到提醒阈值: {self.volume_alarm_max}, 可能有异常"
+                        f"已达到提醒阈值: {self.volume_alarm_max}, 可能有异常\n"
                     self.send_message_to_wechat_friend(message)
                     self.volume_alarm_max_sent = True
 
             elif mask == "check_rise_percent_max" and not self.daily_rise_percent_max_sent:
                 if self.current_percent > self.daily_rise_percent_max:
                     message = f"{stock_name} {self.stock_number} 今日涨幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_rise_percent_max}, 可以考虑卖出"
+                        f"已达到每日初级阈值: {self.daily_rise_percent_max}, 可以考虑卖出\n"
+                    if self.daily_rise_percent_max2 != 0:
+                        message = message + f"还有中级阈值未达到: {self.daily_rise_percent_max2}\n"
+                    if self.daily_rise_percent_max3 != 0:
+                        message = message + f"还有最终阈值未达到: {self.daily_rise_percent_max3}\n"
+
+                    if self.p_continue_days_max != 0:
+                        message = message + f"连续上涨天数已设置:{self.p_continue_days_max}天, 到昨天已上涨:{self.p_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_rise_percent_max_sent = True
 
             elif mask == "check_rise_percent_max2" and not self.daily_rise_percent_max2_sent:
                 if self.current_percent > self.daily_rise_percent_max2:
                     message = f"{stock_name} {self.stock_number} 今日涨幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_rise_percent_max2}, 可以考虑卖出"
+                        f"已达到每日中级阈值: {self.daily_rise_percent_max2}, 可以考虑卖出\n"
+                    if self.daily_rise_percent_max3 != 0:
+                        message = message + f"还有最终阈值未达到: {self.daily_rise_percent_max3}\n"
+
+                    if self.p_continue_days_max != 0:
+                        message = message + f"连续上涨天数已设置:{self.p_continue_days_max}天, 到昨天已上涨:{self.p_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_rise_percent_max2_sent = True
 
             elif mask == "check_rise_percent_max3" and not self.daily_rise_percent_max3_sent:
                 if self.current_percent > self.daily_rise_percent_max3:
                     message = f"{stock_name} {self.stock_number} 今日涨幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_rise_percent_max3}, 可以考虑卖出"
+                        f"已达到每日最终阈值: {self.daily_rise_percent_max3}, 可以考虑卖出\n"
+
+                    if self.p_continue_days_max != 0:
+                        message = message + f"连续上涨天数已设置:{self.p_continue_days_max}天, 到昨天已上涨:{self.p_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_rise_percent_max3_sent = True
 
             elif mask == "check_fall_percent_max" and not self.daily_fall_percent_max_sent:
                 if self.current_percent < self.daily_fall_percent_max:
                     message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_fall_percent_max}, 今天大趋势下跌, 可以考虑补仓或者卖出"
+                        f"已达到每日初级阈值: {self.daily_fall_percent_max}, 今天大趋势下跌, 可以考虑补仓或者卖出\n"
+                    if self.daily_fall_percent_max2 != 0:
+                        message = message + f"还有中级阈值未达到: {self.daily_fall_percent_max2}\n"
+                    if self.daily_fall_percent_max3 != 0:
+                        message = message + f"还有最终阈值未达到: {self.daily_fall_percent_max3}\n"
+
+                    if self.n_continue_days_max != 0:
+                        message = message + f"连续下跌天数已设置:{self.n_continue_days_max}天, 到昨天已下跌:{self.n_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_fall_percent_max_sent = True
 
             elif mask == "check_fall_percent_max2" and not self.daily_fall_percent_max2_sent:
                 if self.current_percent < self.daily_fall_percent_max2:
                     message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_fall_percent_max2}, 今天大趋势下跌, 可以考虑补仓或者卖出"
+                        f"已达到每日中级阈值: {self.daily_fall_percent_max2}, 今天大趋势下跌, 可以考虑补仓或者卖出\n"
+                    if self.daily_fall_percent_max3 != 0:
+                        message = message + f"还有最终阈值未达到: {self.daily_fall_percent_max3}\n"
+
+                    if self.n_continue_days_max != 0:
+                        message = message + f"连续下跌天数已设置:{self.n_continue_days_max}天, 到昨天已下跌:{self.n_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_fall_percent_max2_sent = True
 
             elif mask == "check_fall_percent_max3" and not self.daily_fall_percent_max3_sent:
                 if self.current_percent < self.daily_fall_percent_max3:
                     message = f"{stock_name} {self.stock_number} 今日跌幅: {self.current_percent} " \
-                        f"已达到每日阈值: {self.daily_fall_percent_max3}, 今天大趋势下跌, 可以考虑补仓或者卖出"
+                        f"已达到每日最终阈值: {self.daily_fall_percent_max3}, 今天大趋势下跌, 可以考虑补仓或者卖出\n"
+
+                    if self.n_continue_days_max != 0:
+                        message = message + f"连续下跌天数已设置:{self.n_continue_days_max}天, 到昨天已下跌:{self.n_continue_days}天,请知悉\n"
+
                     self.send_message_to_wechat_friend(message)
                     self.daily_fall_percent_max3_sent = True
 
@@ -226,7 +264,7 @@ class StockTracker:
                 if self.p_continue_change_percent + self.current_percent > self.p_continue_change_percent_max:
                     message = f"{stock_name} {self.stock_number} 连续涨幅: " \
                         f"{round(self.p_continue_change_percent + self.current_percent, 4)} 已达到阈值:" \
-                        f" {self.p_continue_change_percent_max}, 可以考虑卖出"
+                        f" {self.p_continue_change_percent_max}, 可以考虑卖出\n"
                     self.send_message_to_wechat_friend(message)
                     self.p_continue_change_percent_max_sent = True
 
@@ -234,7 +272,7 @@ class StockTracker:
                 if self.n_continue_change_percent + self.current_percent < self.n_continue_change_percent_max:
                     message = f"{stock_name} {self.stock_number} 连续跌幅: " \
                         f"{round(self.n_continue_change_percent + self.current_percent, 4)} 已达到阈值: " \
-                        f"{self.n_continue_change_percent_max}, 可以考虑买入"
+                        f"{self.n_continue_change_percent_max}, 可以考虑买入\n"
                     self.send_message_to_wechat_friend(message)
                     self.n_continue_change_percent_max_sent = True
 
@@ -243,7 +281,7 @@ class StockTracker:
                     if self.p_continue_days + self.today_rise == self.p_continue_days_max or \
                             self.p_continue_days >= self.p_continue_days_max:
                         message = f"{stock_name} {self.stock_number} 连续上涨天数: " \
-                            f"{self.p_continue_days + self.today_rise} 已达到阈值: {self.p_continue_days_max}, 可以考虑卖出"
+                            f"{self.p_continue_days + self.today_rise} 已达到阈值: {self.p_continue_days_max}, 可以考虑卖出\n"
                         self.send_message_to_wechat_friend(message)
                         self.p_continue_days_max_sent = True
 
@@ -252,7 +290,7 @@ class StockTracker:
                     if self.n_continue_days + self.today_fall == self.n_continue_days_max or \
                             self.n_continue_days >= self.n_continue_days_max:
                         message = f"{stock_name} {self.stock_number} 连续下跌天数: " \
-                            f"{self.n_continue_days + self.today_fall} 已达到阈值: {self.n_continue_days_max}, 可以考虑买入"
+                            f"{self.n_continue_days + self.today_fall} 已达到阈值: {self.n_continue_days_max}, 可以考虑买入\n"
                         self.send_message_to_wechat_friend(message)
                         self.n_continue_days_max_sent = True
             # contibue fall and watch the day rise or ndays rise will be concidered
